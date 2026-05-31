@@ -1,0 +1,11 @@
+{
+  "name": "worsek-discord-bot",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.0.0"
+  }
+}
