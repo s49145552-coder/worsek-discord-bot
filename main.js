@@ -1,19 +1,20 @@
 const { Client, GatewayIntentBits, EmbedBuilder, ActivityType } = require("discord.js");
- 
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMembers,
   ],
 });
- 
+
 const TOKEN = process.env.TOKEN;
- 
+
 // ✅ Your own group (always gets a green checkmark)
 const MY_GROUP_ID = 1100488023;
- 
+
 // ❌ Blacklisted groups (these must be left to get verified)
 const BLACKLISTED_GROUPS = [
   { id: 809253103, name: "YWL" },
@@ -26,16 +27,11 @@ const BLACKLISTED_GROUPS = [
   { id: 740130810, name: "Stabb" },
   { id: 1021445108, name: "Disaster" },
   { id: 478836785, name: "Slepce" },
-{ id: 370588965, name: "Franchisek" },
-{ id: 824676133, name: "Heavenly" },
-    { id: 76112202, name: "GRAVE" },
-    { id: 954779488, name: "ProspectK" },
-    { id: 35444659, name: "Wraith" },
-    { id: 34423792, name: "7evenge" },
+  { id: 370588965, name: "Franchisek" },
 ];
- 
+
 const PREFIX = "!";
- 
+
 // ── Voice Status ──────────────────────────────────────────
 function getTotalVoiceMembers() {
   let total = 0;
@@ -46,7 +42,7 @@ function getTotalVoiceMembers() {
   }
   return total;
 }
- 
+
 async function updateStatus() {
   const count = getTotalVoiceMembers();
   await client.user.setActivity(`${count} active users in vcs`, {
@@ -55,29 +51,60 @@ async function updateStatus() {
   console.log(`[VoiceStatus] Updated: ${count} active users in vcs`);
 }
 // ─────────────────────────────────────────────────────────
- 
+
 client.once("ready", () => {
   console.log(`✅ Bot is online as ${client.user.tag}`);
   updateStatus();
   setInterval(updateStatus, 30000);
 });
- 
+
 client.on("voiceStateUpdate", () => updateStatus());
- 
+
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!message.content.startsWith(PREFIX)) return;
- 
+
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
- 
+
+  // ── !DM RAID ──────────────────────────────────────────
+  if (command === "dm" && args[0]?.toUpperCase() === "RAID") {
+    if (!message.member.permissions.has("Administrator")) {
+      return message.reply("❗ You don't have permission to use this command!");
+    }
+
+    const raidRole = message.guild.roles.cache.get("1512569586829103204");
+    if (!raidRole) {
+      return message.reply("❗ Role not found on this server!");
+    }
+
+    const raidMessage = "THERES A RAID GOING ON IN discord.gg/worsek RIGHT NOW CHECK IT UP GO GO GO GO";
+
+    let sent = 0;
+    let failed = 0;
+
+    await message.reply("📨 Sending DMs...");
+
+    for (const [, member] of raidRole.members) {
+      try {
+        await member.send(raidMessage);
+        sent++;
+      } catch {
+        failed++;
+      }
+    }
+
+    return message.channel.send(`✅ Done! **${sent}** DMs sent, **${failed}** failed (DMs closed).`);
+  }
+  // ─────────────────────────────────────────────────────
+
   if (command !== "groupcheck") return;
- 
+
   const username = args[0];
   if (!username) {
     return message.reply("❗ Please provide a Roblox username! Example: `!groupcheck Username`");
   }
- 
+
   try {
     const userRes = await fetch(
       `https://users.roblox.com/v1/usernames/users`,
@@ -88,29 +115,29 @@ client.on("messageCreate", async (message) => {
       }
     );
     const userData = await userRes.json();
- 
+
     if (!userData.data || userData.data.length === 0) {
       return message.reply(`❗ Roblox user **${username}** was not found.`);
     }
- 
+
     const userId = userData.data[0].id;
     const displayName = userData.data[0].name;
- 
+
     const groupsRes = await fetch(
       `https://groups.roblox.com/v2/users/${userId}/groups/roles`
     );
     const groupsData = await groupsRes.json();
     const groups = groupsData.data || [];
- 
+
     let groupLines = [];
     let hasBlacklisted = false;
     let inMyGroup = false;
- 
+
     for (const entry of groups) {
       const g = entry.group;
       const isBlacklisted = BLACKLISTED_GROUPS.some((bl) => bl.id === g.id);
       const isMyGroup = g.id === MY_GROUP_ID;
- 
+
       if (isMyGroup) {
         inMyGroup = true;
         groupLines.push(`✅ **${g.name}** *(your group)*`);
@@ -121,17 +148,17 @@ client.on("messageCreate", async (message) => {
         groupLines.push(`• ${g.name}`);
       }
     }
- 
+
     if (groupLines.length === 0) {
       groupLines.push("*No groups found*");
     }
- 
+
     const avatarRes = await fetch(
       `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png`
     );
     const avatarData = await avatarRes.json();
     const avatarUrl = avatarData.data?.[0]?.imageUrl || null;
- 
+
     let statusText;
     if (inMyGroup && !hasBlacklisted) {
       statusText = "✅ Can be verified";
@@ -140,7 +167,7 @@ client.on("messageCreate", async (message) => {
     } else {
       statusText = "⚠️ Not in your group yet";
     }
- 
+
     const embed = new EmbedBuilder()
       .setTitle(`Group Checker`)
       .setColor(hasBlacklisted ? 0xe74c3c : inMyGroup ? 0x2ecc71 : 0xf39c12)
@@ -153,14 +180,14 @@ client.on("messageCreate", async (message) => {
       )
       .setFooter({ text: `Page (1/1)` })
       .setTimestamp();
- 
+
     if (avatarUrl) embed.setThumbnail(avatarUrl);
- 
+
     await message.reply({ embeds: [embed] });
   } catch (err) {
     console.error(err);
     message.reply("❗ An error occurred. Please try again.");
   }
 });
- 
+
 client.login(TOKEN);
