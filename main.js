@@ -136,7 +136,7 @@ client.on("guildMemberAdd", async (member) => {
  
   // Neue Accounts (unter 7 Tage alt)
   const accountAge = Date.now() - member.user.createdTimestamp;
-  const sevenDays = 7 * 24 * 60 * 60 * 1000;
+  const sevenDays = 2 * 24 * 60 * 60 * 1000;
   if (accountAge < sevenDays) {
     await punish(guild, member.id, `New account joined (account age: ${Math.floor(accountAge / 86400000)} days)`);
     return;
