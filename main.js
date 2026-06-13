@@ -102,6 +102,9 @@ const BLACKLISTED_GROUPS = [
   { id: 1021445108, name: "Disaster" },
   { id: 478836785, name: "Slepce" },
   { id: 370588965, name: "Franchisek" },
+   { id: 169475628, name: "Snowfall" },
+    { id:10475727, name: "Yazu" },
+    { id:35914267, name: "Glory" },
 ];
 const PREFIX = "!";
  
