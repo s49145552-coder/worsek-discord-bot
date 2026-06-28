@@ -268,6 +268,44 @@ client.on("messageCreate", async (message) => {
     return message.channel.send(`✅ Done! **${sent}** DMs sent, **${failed}** failed.`);
   }
  
+ // !DM ALL <message>
+if (command === "dm" && args[0]?.toUpperCase() === "ALL") {
+  if (!message.member.permissions.has("Administrator")) {
+    return message.reply("❗ You don't have permission to use this command!");
+  }
+
+  // Get everything after "!DM ALL"
+  const dmMessage = args.slice(1).join(" ");
+
+  if (!dmMessage) {
+    return message.reply("❗ Please provide a message to send!");
+  }
+
+  let sent = 0;
+  let failed = 0;
+
+  await message.reply("📨 Sending DMs to all server members...");
+
+  // Fetch all members
+  await message.guild.members.fetch();
+
+  for (const [, member] of message.guild.members.cache) {
+    // Skip bots
+    if (member.user.bot) continue;
+
+    try {
+      await member.send(dmMessage);
+      sent++;
+    } catch (err) {
+      failed++;
+    }
+  }
+
+  return message.channel.send(
+    `✅ Done! **${sent}** DMs sent, **${failed}** failed.`
+  );
+}
+ 
   // !addpoints @User <amount>
   if (command === "addpoints") {
     if (!message.member.permissions.has("Administrator")) {
