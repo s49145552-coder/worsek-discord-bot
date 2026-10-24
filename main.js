@@ -8,6 +8,7 @@ const {
 } = require("@discordjs/voice");
 
 // ==== Put your tokens directly here ====
+const DISCORD_TOKEN = "MTU2MTAyNzUzODI1ODQ5NzY0Nw.GGgsc-.ujUu0XHnwAwqN5emy_avBQrZLb3QMl43B9z3cQ";
 const HENRIK_API_KEY = "HDEV-227d3005-f62d-4e82-8a55-6a57871971b1";
 
 // ==== Client setup ====
