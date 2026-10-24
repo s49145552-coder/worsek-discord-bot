@@ -1,11 +1,18 @@
 {
-  "name": "worsek-discord-bot",
+  "name": "discord-bot",
   "version": "1.0.0",
+  "description": "Discord bot",
   "main": "main.js",
   "scripts": {
     "start": "node main.js"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
-    "discord.js": "^14.0.0"
+    "@discordjs/voice": "",
+    "@napi-rs/canvas": "",
+    "discord.js": "^14.0.0",
+    "tweetnacl": "*"
   }
 }
